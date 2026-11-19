@@ -1,0 +1,108 @@
+# cicdbench rehearsal copy (scripts/ops/skipbox-bench-cicd-gen.rb): upstream's workflow with cicdbench's listed changes.
+name: Test
+jobs:
+  test:
+    runs-on: skipbox-lab
+    name: pnpm test
+    env:
+      NEXT_PUBLIC_APP_URL: http://localhost:4000
+      NEXT_PUBLIC_V0_URL: https://v0.dev
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      id: pnpm-install
+      with:
+        version: 10.33.4
+        run_install: false
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      run: 'echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+        '
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: "${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}"
+        key: "${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}"
+        restore-keys: "${{ runner.os }}-pnpm-store-\n"
+    - name: Install Bun
+      uses: oven-sh/setup-bun@v2
+    - name: Install dependencies
+      run: pnpm install
+    - run: pnpm test
+    timeout-minutes: 30
+  react:
+    runs-on: skipbox-lab
+    name: pnpm test (@shadcn/react)
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      id: pnpm-install
+      with:
+        version: 10.33.4
+        run_install: false
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      run: 'echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+        '
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: "${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}"
+        key: "${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}"
+        restore-keys: "${{ runner.os }}-pnpm-store-\n"
+    - name: Install dependencies
+      run: pnpm install
+    - run: pnpm --filter=@shadcn/react test
+    timeout-minutes: 30
+  helpers:
+    runs-on: skipbox-lab
+    name: pnpm test (@shadcn/helpers)
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      id: pnpm-install
+      with:
+        version: 10.33.4
+        run_install: false
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      run: 'echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+        '
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: "${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}"
+        key: "${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}"
+        restore-keys: "${{ runner.os }}-pnpm-store-\n"
+    - name: Install dependencies
+      run: pnpm install
+    - run: pnpm --filter=@shadcn/helpers test
+    timeout-minutes: 30
+'on':
+  pull_request:
+    branches:
+    - "*"
